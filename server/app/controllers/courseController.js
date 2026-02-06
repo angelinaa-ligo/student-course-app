@@ -68,6 +68,28 @@ exports.deleteCourse = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+// remove students
+exports.removeStudentFromCourse = async (req, res) => {
+  try {
+    const { courseId, studentId } = req.params;
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    course.students = course.students.filter(
+      id => id.toString() !== studentId
+    );
+
+    await course.save();
+
+    res.json({ message: 'Student removed from course', course });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 
 // add students
 exports.addStudentToCourse = async (req, res) => {

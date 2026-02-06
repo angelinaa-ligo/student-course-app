@@ -10,5 +10,6 @@ router.delete('/:id', courseController.deleteCourse);
 
 //add a student
 router.post('/:courseId/students/:studentId', courseController.addStudentToCourse);
-
+//remove a student
+router.delete('/:courseId/students/:studentId', courseController.removeStudentFromCourse);
 module.exports = router;
