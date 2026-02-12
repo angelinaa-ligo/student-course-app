@@ -6,7 +6,10 @@ export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState({});
-const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+
+  const role = localStorage.getItem("role");
+  const loggedStudentId = localStorage.getItem("studentId");
 
   const [form, setForm] = useState({
     courseCode: "",
@@ -32,68 +35,91 @@ const [editingId, setEditingId] = useState(null);
   }
 
   async function handleSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (editingId) {
-    await api.put(`/courses/${editingId}`, form);
-    alert("Course updated");
-  } else {
-    await api.post("/courses", form);
-    alert("Course created");
+    if (editingId) {
+      await api.put(`/courses/${editingId}`, form);
+      alert("Course updated");
+    } else {
+      await api.post("/courses", form);
+      alert("Course created");
+    }
+
+    setForm({
+      courseCode: "",
+      courseName: "",
+      section: "",
+      semester: ""
+    });
+
+    setEditingId(null);
+    loadData();
   }
 
-  setForm({
-    courseCode: "",
-    courseName: "",
-    section: "",
-    semester: ""
-  });
+  async function deleteCourse(courseId) {
+    if (!window.confirm("Are you sure?")) return;
 
-  setEditingId(null);
-  loadData();
-}
+    await api.delete(`/courses/${courseId}`);
+    loadData();
+  }
 
+  async function dropCourse(courseId, studentId) {
+    if (!window.confirm("Drop this course?")) return;
+
+    await api.delete(`/courses/${courseId}/students/${studentId}`);
+    alert("Course dropped");
+    loadData();
+  }
 
   async function addStudent(courseId) {
-    const studentId = selectedStudent[courseId];
+  let studentId;
+
+  if (role === "admin") {
+    studentId = selectedStudent[courseId];
+
     if (!studentId) {
       alert("Select a student first");
       return;
     }
-
-    await api.post(`/courses/${courseId}/students/${studentId}`);
-    alert("Student added to course");
-
-    loadData();
+  } else {
+    studentId = loggedStudentId;
   }
-function editCourse(course) {
-  setForm({
-    courseCode: course.courseCode,
-    courseName: course.courseName,
-    section: course.section,
-    semester: course.semester
-  });
 
-  setEditingId(course._id);
-}
-async function deleteCourse(courseId) {
-  if (!window.confirm("Are you sure you want to delete this course?")) {
+  const student = students.find(s => s._id === studentId);
+  const courseToEnroll = courses.find(c => c._id === courseId);
+
+  
+  if (!student?.program) {
+    alert("Student must be assigned to a program before enrolling in a course.");
     return;
   }
 
-  await api.delete(`/courses/${courseId}`);
-  alert("Course deleted");
+  
+  const alreadyInSameCourseCode = courses.some(course =>
+    course.courseCode === courseToEnroll.courseCode &&
+    course.students?.some(s => s._id === studentId)
+  );
 
+  if (alreadyInSameCourseCode) {
+    alert("Student is already enrolled in this course (different section not allowed).");
+    return;
+  }
+
+  await api.post(`/courses/${courseId}/students/${studentId}`);
+  alert("Student added");
   loadData();
 }
-async function dropCourse(courseId, studentId) {
-  if (!window.confirm("Drop this course?")) return;
 
-  await api.delete(`/courses/${courseId}/students/${studentId}`);
-  alert("Course dropped");
 
-  loadData();
+let visibleCourses = courses;
+
+ 
+ if (role === "student") {
+  visibleCourses = courses;
 }
+
+
+console.log(courses);
 
   return (
     <>
@@ -102,94 +128,138 @@ async function dropCourse(courseId, studentId) {
       <div style={{ padding: "20px" }}>
         <h1>Courses</h1>
 
-        {/* ADD COURSE */}
-        <h3>{editingId ? "Edit Course" : "Add Course"}</h3>
-        <form onSubmit={handleSubmit}>
-          <input
-            name="courseCode"
-            placeholder="Course Code"
-            value={form.courseCode}
-            onChange={handleChange}
-          />
-          <input
-            name="courseName"
-            placeholder="Course Name"
-            value={form.courseName}
-            onChange={handleChange}
-          />
-          <input
-            name="section"
-            placeholder="Section"
-            value={form.section}
-            onChange={handleChange}
-          />
-          <input
-            name="semester"
-            placeholder="Semester"
-            value={form.semester}
-            onChange={handleChange}
-          />
+        {/* ADMIN ONLY - CREATE COURSE */}
+        {role === "admin" && (
+          <>
+            <h3>{editingId ? "Edit Course" : "Add Course"}</h3>
 
-          <button type="submit">
-  {editingId ? "Update Course" : "Create Course"}
-</button>
-        </form>
+            <form onSubmit={handleSubmit}>
+              <input
+                name="courseCode"
+                placeholder="Course Code"
+                value={form.courseCode}
+                onChange={handleChange}
+              />
+              <input
+                name="courseName"
+                placeholder="Course Name"
+                value={form.courseName}
+                onChange={handleChange}
+              />
+              <input
+                name="section"
+                placeholder="Section"
+                value={form.section}
+                onChange={handleChange}
+              />
+              <input
+                name="semester"
+                placeholder="Semester"
+                value={form.semester}
+                onChange={handleChange}
+              />
+              <button type="submit">
+                {editingId ? "Update Course" : "Create Course"}
+              </button>
+            </form>
 
-        <hr />
+            <hr />
+          </>
+        )}
 
         {/* COURSES LIST */}
-        {courses.map((course) => (
+        {visibleCourses.map(course => (
           <div
             key={course._id}
             style={{
               border: "1px solid black",
               marginBottom: "20px",
-              padding: "10px",
+              padding: "10px"
             }}
           >
             <h3>
               {course.courseCode} - {course.courseName}
             </h3>
-              <button onClick={() => editCourse(course)}>Edit</button>
-              <button onClick={() => deleteCourse(course._id)}>Delete</button>
+
             <p>
               Section: {course.section} | Semester: {course.semester}
             </p>
 
-            <p>Students enrolled:</p>
-<ul>
-  {course.students.map((s) => (
+            {/* ADMIN ACTIONS */}
+            {role === "admin" && (
+              <>
+                <button onClick={() => setEditingId(course._id)}>
+                  Edit
+                </button>
+                <button onClick={() => deleteCourse(course._id)}>
+                  Delete
+                </button>
+              </>
+            )}
+
+            <p>Students:</p>
+
+            <ul>
+  {course.students?.map(s => (
     <li key={s._id}>
       {s.firstName} {s.lastName}
-      <button
-        style={{ marginLeft: "10px" }}
-        onClick={() => dropCourse(course._id, s._id)}
-      >
-        Drop
-      </button>
+
+      {/* STUDENT DROP */}
+      {role === "student" && s._id === loggedStudentId && (
+        <button
+          style={{ marginLeft: "10px" }}
+          onClick={() => dropCourse(course._id, s._id)}
+        >
+          Drop
+        </button>
+      )}
+
+      {/* ADMIN DROP */}
+      {role === "admin" && (
+        <button
+          style={{ marginLeft: "10px" }}
+          onClick={() => dropCourse(course._id, s._id)}
+        >
+          Drop
+        </button>
+      )}
     </li>
   ))}
 </ul>
-            {/* ADD STUDENT TO COURSE */}
-            <select
-              onChange={(e) =>
-                setSelectedStudent({
-                  ...selectedStudent,
-                  [course._id]: e.target.value,
-                })
-              }
-            >
-              <option value="">-- Select Student --</option>
-              {students.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.firstName} {s.lastName}
-                </option>
-              ))}
-            </select>
 
-            <button onClick={() => addStudent(course._id)}>
-              Add Student
-            </button>
+{/* STUDENT ENROLL BUTTON — FORA DO MAP */}
+{role === "student" &&
+  !course.students?.some(s => s._id === loggedStudentId) && (
+    <button onClick={() => addStudent(course._id)}>
+      Enroll in this course
+    </button>
+)}
+
+
+            {/* ADMIN ADD STUDENT */}
+            {role === "admin" && (
+              <>
+                <select
+                  onChange={e =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      [course._id]: e.target.value
+                    })
+                  }
+                >
+                  <option value="">-- Select Student --</option>
+                  {students.map(s => (
+                    <option key={s._id} value={s._id}>
+                      {s.firstName} {s.lastName}
+                    </option>
+                  ))}
+                </select>
+
+                <button onClick={() => addStudent(course._id)}>
+                  Add Student
+                </button>
+              </>
+            )}
           </div>
         ))}
       </div>

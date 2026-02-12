@@ -2,28 +2,41 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
 
-
 export default function Admin() {
   const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
   const [editingId, setEditingId] = useState(null);
+
   const [form, setForm] = useState({
-    studentNumber: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    program: "",
-    favoriteTopic: "",
-    strongestSkill: ""
-  });
+  studentNumber: "",
+  password: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  program: "",
+  favoriteTopic: "",
+  strongestSkill: ""
+});
+
+  const programs = [
+  "Software Engineering",
+  "Web Development",
+  "AI & Data Science",
+  "Cyber Security",
+  "Game Development"
+];
 
   useEffect(() => {
-    loadStudents();
+    loadData();
   }, []);
 
-  async function loadStudents() {
-    const res = await api.get("/students");
-    setStudents(res.data);
+  async function loadData() {
+    const studentsRes = await api.get("/students");
+    const coursesRes = await api.get("/courses");
+
+    setStudents(studentsRes.data);
+    setCourses(coursesRes.data);
   }
 
   function handleChange(e) {
@@ -33,53 +46,74 @@ export default function Admin() {
   async function handleSubmit(e) {
   e.preventDefault();
 
-  if (editingId) {
-    await api.put(`/students/${editingId}`, form);
-    alert("Student updated");
-  } else {
-    await api.post("/students", form);
-    alert("Student created");
-  }
-
-  setForm({
-    studentNumber: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    program: "",
-    favoriteTopic: "",
-    strongestSkill: ""
-  });
-
-  setEditingId(null);
-  loadStudents();
-}
-
-async function deleteStudent(id) {
-  if (!window.confirm("Are you sure you want to delete this student?")) {
+  
+  if (selectedCourse && !form.program) {
+    alert("Student must have a program before being added to a course.");
     return;
   }
 
-  await api.delete(`/students/${id}`);
-  alert("Student deleted");
+  try {
+    let student;
 
-  loadStudents();
-}
-function editStudent(student) {
-  setForm({
-    studentNumber: student.studentNumber,
-    password: "", 
-    firstName: student.firstName,
-    lastName: student.lastName,
-    email: student.email,
-    program: student.program,
-    favoriteTopic: student.favoriteTopic || "",
-    strongestSkill: student.strongestSkill || ""
-  });
+    if (editingId) {
+      const res = await api.put(`/students/${editingId}`, form);
+      student = res.data;
+      alert("Student updated");
+    } else {
+      const res = await api.post("/students", form);
+      student = res.data;
+      alert("Student created");
+    }
 
-  setEditingId(student._id);
+    
+    if (selectedCourse && form.program) {
+      await api.post(
+        `/courses/${selectedCourse}/students/${student._id}`
+      );
+    }
+
+    setForm({
+      studentNumber: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      program: "",
+      favoriteTopic: "",
+      strongestSkill: ""
+    });
+
+    setSelectedCourse("");
+    setEditingId(null);
+    loadData();
+
+  } catch (err) {
+    alert("Error saving student");
+  }
 }
+
+
+  async function deleteStudent(id) {
+    if (!window.confirm("Are you sure you want to delete this student?")) return;
+
+    await api.delete(`/students/${id}`);
+    alert("Student deleted");
+    loadData();
+  }
+
+  function editStudent(student) {
+    setForm({
+      studentNumber: student.studentNumber,
+      password: "",
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.email,
+      favoriteTopic: student.favoriteTopic || "",
+      strongestSkill: student.strongestSkill || ""
+    });
+
+    setEditingId(student._id);
+  }
 
   return (
     <>
@@ -89,49 +123,77 @@ function editStudent(student) {
         <h1>Admin Panel</h1>
 
         <h3>{editingId ? "Edit Student" : "Add Student"}</h3>
+
         <form onSubmit={handleSubmit}>
           <input name="studentNumber" placeholder="Student Number" value={form.studentNumber} onChange={handleChange} />
           <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} />
           <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} />
           <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} />
           <input name="email" placeholder="Email" value={form.email} onChange={handleChange} />
-          <input name="program" placeholder="Program" value={form.program} onChange={handleChange} />
           <input name="favoriteTopic" placeholder="Favorite Topic" value={form.favoriteTopic} onChange={handleChange} />
           <input name="strongestSkill" placeholder="Strongest Skill" value={form.strongestSkill} onChange={handleChange} />
+
+          <select
+  name="program"
+  value={form.program}
+  onChange={handleChange}
+>
+  <option value="">Select Program</option>
+
+  {programs.map(p => (
+    <option key={p} value={p}>
+      {p}
+    </option>
+  ))}
+</select>
+
+          <select
+            value={selectedCourse}
+            onChange={(e) => setSelectedCourse(e.target.value)}
+          >
+            <option value="">-- Select Course (Optional) --</option>
+            {courses.map((course) => (
+              <option key={course._id} value={course._id}>
+                {course.courseCode} - {course.courseName}
+              </option>
+            ))}
+          </select>
+
           <button type="submit">
-  {editingId ? "Update Student" : "Create Student"}
-</button>
+            {editingId ? "Update Student" : "Create Student"}
+          </button>
         </form>
 
         <hr />
 
         <h3>Students</h3>
-        <table border="1" cellPadding="10">
-  <thead>
-    <tr>
-      <th>Student #</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Program</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
 
-  <tbody>
-    {students.map((s) => (
-      <tr key={s._id}>
-        <td>{s.studentNumber}</td>
-        <td>{s.firstName} {s.lastName}</td>
-        <td>{s.email}</td>
-        <td>{s.program}</td>
-        <td>
-          <button onClick={() => editStudent(s)}>Edit</button>
-          <button onClick={() => deleteStudent(s._id)}>Delete</button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+        <table border="1" cellPadding="10">
+          <thead>
+            <tr>
+              <th>Student #</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Program</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+  {students.map((s) => (
+    <tr key={s._id}>
+      <td>{s.studentNumber}</td>
+      <td>{s.firstName} {s.lastName}</td>
+      <td>{s.email}</td>
+      <td>{s.program || "Not Assigned"}</td>
+      <td>
+        <button onClick={() => editStudent(s)}>Edit</button>
+        <button onClick={() => deleteStudent(s._id)}>Delete</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+        </table>
       </div>
     </>
   );

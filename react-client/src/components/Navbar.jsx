@@ -3,9 +3,10 @@ import "./Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const role = localStorage.getItem("role");
 
   function handleLogout() {
-    localStorage.removeItem("role");
+    localStorage.clear();
     navigate("/");
   }
 
@@ -16,7 +17,12 @@ export default function Navbar() {
       <div className="links">
         <Link to="/dashboard">Dashboard</Link>
         <Link to="/courses">Courses</Link>
-        <Link to="/admin">Admin</Link>
+
+        {/* ADMIN */}
+        {role === "admin" && <Link to="/admin">Admin</Link>}
+
+        {/* STUDENT */}
+        {role === "student" && <Link to="/profile">Edit Profile</Link>}
 
         <button onClick={handleLogout} className="logout">
           Logout

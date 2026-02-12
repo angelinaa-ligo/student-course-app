@@ -8,28 +8,36 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+ async function handleSubmit(e) {
   e.preventDefault();
 
+  // ADMIN TEMP
+  if (email === "admin@test.com" && password === "1234") {
+    localStorage.setItem("role", "admin");
+    navigate("/admin");
+    return;
+  }
+
   try {
-    const res = await api.post("/auth/login", {
-      email,
-      password,
-    });
+    
+    const res = await api.get("/students");
+    const student = res.data.find(s => s.email === email);
 
-    // Temporary
-    localStorage.setItem("role", res.data.role);
-
-    if (res.data.role === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/dashboard");
+    if (!student) {
+      alert("Student not found");
+      return;
     }
 
+    localStorage.setItem("role", "student");
+    localStorage.setItem("studentId", student._id);
+
+    navigate("/dashboard");
   } catch (err) {
     alert("Login failed");
   }
 }
+
+
 
 
   return (

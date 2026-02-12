@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Courses from "../pages/Courses";
 import Admin from "../pages/Admin";
+import Profile from "../pages/Profile";
 
 import PrivateRoute from "./PrivateRoute";
 
@@ -12,6 +13,14 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route
+  path="/profile"
+  element={
+    <PrivateRoute role="student">
+      <Profile />
+    </PrivateRoute>
+  }
+/>
 
         <Route
           path="/dashboard"
