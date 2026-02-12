@@ -4,9 +4,10 @@ import api from "../services/api";
 
 export default function Dashboard() {
   const [student, setStudent] = useState(null);
-  const [course, setCourse] = useState(null);
+  const [courses, setCourses] = useState([]);
 
   const studentId = localStorage.getItem("studentId");
+  const role = localStorage.getItem("role"); // "student" ou "admin"
 
   useEffect(() => {
     loadDashboard();
@@ -14,25 +15,33 @@ export default function Dashboard() {
 
   async function loadDashboard() {
     try {
-      // load student info
+
+      // 🔹 Se for ADMIN
+      if (role === "admin") {
+        const coursesRes = await api.get("/courses");
+        setCourses(coursesRes.data);
+        return;
+      }
+
+      // 🔹 Se for STUDENT
       const studentRes = await api.get(`/students/${studentId}`);
       setStudent(studentRes.data);
 
-      // load courses
       const coursesRes = await api.get("/courses");
 
-      const enrolled = coursesRes.data.find(course =>
+      // Agora pega TODOS os cursos onde o aluno está
+      const enrolledCourses = coursesRes.data.filter(course =>
         course.students?.some(s => s._id === studentId)
       );
 
-      setCourse(enrolled || null);
+      setCourses(enrolledCourses);
 
     } catch (err) {
       console.error(err);
     }
   }
 
-  if (!student) return <p>Loading...</p>;
+  if (role !== "admin" && !student) return <p>Loading...</p>;
 
   return (
     <>
@@ -41,26 +50,60 @@ export default function Dashboard() {
       <div style={{ padding: "20px" }}>
         <h1>Dashboard</h1>
 
-        <h2>Student Info</h2>
-        <p><b>Name:</b> {student.firstName} {student.lastName}</p>
-        <p><b>Email:</b> {student.email}</p>
-        <p><b>Student #:</b> {student.studentNumber}</p>
-        <p><b>Favorite Topic:</b> {student.favoriteTopic}</p>
-        <p><b>Strongest Skill:</b> {student.strongestSkill}</p>
-        <p><b>Program:</b> {student.program || "Not Assigned"}</p>
-        <hr />
-
-        <h2>Enrollment</h2>
-
-        {course ? (
+        {/* 🔹 STUDENT VIEW */}
+        {role === "student" && student && (
           <>
-            <p><b>Course:</b> {course.courseCode}</p>
-            <p><b>Name:</b> {course.courseName}</p>
-            <p><b>Section:</b> {course.section}</p>
-            <p><b>Semester:</b> {course.semester}</p>
+            <h2>Student Info</h2>
+            <p><b>Name:</b> {student.firstName} {student.lastName}</p>
+            <p><b>Email:</b> {student.email}</p>
+            <p><b>Student #:</b> {student.studentNumber}</p>
+            <p><b>Program:</b> {student.program || "Not Assigned"}</p>
+            <hr />
+
+            <h2>Enrollment</h2>
+
+            {courses.length > 0 ? (
+              courses.map(course => (
+                <div key={course._id} style={{ marginBottom: "15px" }}>
+                  <p><b>Course:</b> {course.courseCode}</p>
+                  <p><b>Name:</b> {course.courseName}</p>
+                  <p><b>Section:</b> {course.section}</p>
+                  <p><b>Semester:</b> {course.semester}</p>
+                  <hr />
+                </div>
+              ))
+            ) : (
+              <p>Not enrolled in any course</p>
+            )}
           </>
-        ) : (
-          <p>Not enrolled in any course</p>
+        )}
+
+        {/* 🔹 ADMIN VIEW */}
+        {role === "admin" && (
+          <>
+            <h2>All Courses</h2>
+
+            {courses.map(course => (
+              <div key={course._id} style={{ marginBottom: "20px" }}>
+                <h3>
+                  {course.courseCode} - {course.section}
+                </h3>
+                <p><b>Name:</b> {course.courseName}</p>
+                <p><b>Semester:</b> {course.semester}</p>
+
+                <b>Students:</b>
+                <ul>
+                  {course.students?.map(s => (
+                    <li key={s._id}>
+                      {s.firstName} {s.lastName}
+                    </li>
+                  ))}
+                </ul>
+
+                <hr />
+              </div>
+            ))}
+          </>
         )}
       </div>
     </>
