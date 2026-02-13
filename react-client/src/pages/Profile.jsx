@@ -45,6 +45,14 @@ export default function Profile() {
   }
 
   async function handleSubmit(e) {
+    for (const key in form) {
+  if (key === "password") continue; 
+
+  if (!form[key].trim()) {
+    alert("All fields are required (except password)");
+    return;
+  }
+}
     e.preventDefault();
 
     const {
@@ -98,15 +106,15 @@ export default function Profile() {
   <h1 className="profile-title">Edit Profile</h1>
 
   <form onSubmit={handleSubmit} className="profile-form">
-    <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" />
-    <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" />
-    <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
-    <input name="address" value={form.address} onChange={handleChange} placeholder="Address" />
-    <input name="city" value={form.city} onChange={handleChange} placeholder="City" />
-    <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" />
+    <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required />
+    <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required/>
+    <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required/>
+    <input name="address" value={form.address} onChange={handleChange} placeholder="Address" required/>
+    <input name="city" value={form.city} onChange={handleChange} placeholder="City" required/>
+    <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" required />
 
-    <input name="favoriteTopic" value={form.favoriteTopic} onChange={handleChange} placeholder="Favorite Topic" />
-    <input name="strongestSkill" value={form.strongestSkill} onChange={handleChange} placeholder="Strongest Skill" />
+    <input name="favoriteTopic" value={form.favoriteTopic} onChange={handleChange} placeholder="Favorite Topic" required/>
+    <input name="strongestSkill" value={form.strongestSkill} onChange={handleChange} placeholder="Strongest Skill" required/>
 
     <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="New Password" />
 

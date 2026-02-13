@@ -54,7 +54,12 @@ export default function Admin() {
 
     if (!form.firstName.trim()) return "First Name is required";
     if (!form.lastName.trim()) return "Last Name is required";
+    if (!form.address.trim()) return "Address is required";
+if (!form.city.trim()) return "City is required";
+if (!form.phoneNumber.trim()) return "Phone number is required";
 
+if (!form.favoriteTopic.trim()) return "Favorite Topic is required";
+if (!form.strongestSkill.trim()) return "Strongest Skill is required";
     if (!form.email) return "Email is required";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       return "Invalid email format";
