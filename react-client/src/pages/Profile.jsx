@@ -6,17 +6,16 @@ export default function Profile() {
   const studentId = localStorage.getItem("studentId");
 
   const [form, setForm] = useState({
-  firstName: "",
-  lastName: "",
-  address: "",
-  city: "",
-  phoneNumber: "",
-  email: "",
-  favoriteTopic: "",
-  strongestSkill: "",
-  password: ""
-});
-
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    phoneNumber: "",
+    email: "",
+    favoriteTopic: "",
+    strongestSkill: "",
+    password: ""
+  });
 
   useEffect(() => {
     loadProfile();
@@ -26,17 +25,16 @@ export default function Profile() {
     try {
       const res = await api.get(`/students/${studentId}`);
       setForm({
-  firstName: res.data.firstName,
-  lastName: res.data.lastName,
-  address: res.data.address || "",
-  city: res.data.city || "",
-  phoneNumber: res.data.phoneNumber || "",
-  email: res.data.email,
-  favoriteTopic: res.data.favoriteTopic || "",
-  strongestSkill: res.data.strongestSkill || "",
-  password: ""
-});
-
+        firstName: res.data.firstName,
+        lastName: res.data.lastName,
+        address: res.data.address || "",
+        city: res.data.city || "",
+        phoneNumber: res.data.phoneNumber || "",
+        email: res.data.email,
+        favoriteTopic: res.data.favoriteTopic || "",
+        strongestSkill: res.data.strongestSkill || "",
+        password: ""
+      });
     } catch {
       alert("Error loading profile");
     }
@@ -49,9 +47,44 @@ export default function Profile() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password
+    } = form;
+
+    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
+      alert("First name, last name, and email are required");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Invalid email format");
+      return;
+    }
+
+    if (phoneNumber && !/^\d{10,15}$/.test(phoneNumber)) {
+      alert("Phone number must be 10–15 digits");
+      return;
+    }
+
+    if (password && password.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+
+    const payload = { ...form };
+    if (!password) {
+      delete payload.password;
+    }
+
     try {
-      await api.put(`/students/${studentId}`, form);
+      await api.put(`/students/${studentId}`, payload);
       alert("Profile updated!");
+      setForm({ ...form, password: "" });
     } catch {
       alert("Update failed");
     }
