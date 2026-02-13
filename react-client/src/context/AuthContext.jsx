@@ -9,10 +9,24 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     async function loadUser() {
+      const token = localStorage.getItem("token");
+
+      // No token, so no request
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       try {
-        const res = await api.get("/auth/me");
+        const res = await api.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setUser(res.data);
-      } catch {
+      } catch (err) {
+        console.error("Auth check failed:", err.response?.status);
         setUser(null);
       } finally {
         setLoading(false);
