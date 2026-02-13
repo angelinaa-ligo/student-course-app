@@ -7,6 +7,18 @@ export default function Courses() {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState({});
   const [editingId, setEditingId] = useState(null);
+  const [selectedSection, setSelectedSection] = useState({});
+
+  const sections = ["001", "002", "003", "004", "005"];
+
+  const semesters = [
+    "Winter 2026",
+    "Summer 2026",
+    "Fall 2026",
+    "Winter 2027",
+    "Summer 2027",
+    "Fall 2027"
+  ];
 
   const role = localStorage.getItem("role");
   const loggedStudentId = localStorage.getItem("studentId");
@@ -41,66 +53,74 @@ export default function Courses() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const { courseCode, courseName, section, semester } = form;
+  const { courseCode, courseName, section, semester } = form;
 
-    
-    if (!courseCode || !courseName || !section || !semester) {
-      alert("All fields are required");
-      return;
-    }
-
-    if (!/^[A-Za-z]{2,4}\d{3}$/.test(courseCode)) {
-      alert("Course code must look like COMP123 or MATH101");
-      return;
-    }
-
-    if (isNaN(section)) {
-      alert("Section must be a number");
-      return;
-    }
-
-   const semesterRegex = /^(winter|summer|fall|spring) 20\d{2}$/i;
-
-if (!semesterRegex.test(semester)) {
-  alert("Semester must be Winter, Summer, Fall, or Spring followed by a year (e.g., Summer 2025)");
-  return;
-}
-
-
-    const duplicate = courses.some(
-      c =>
-        c.courseCode === courseCode &&
-        c.section === section &&
-        c.semester === semester &&
-        c._id !== editingId
-    );
-
-    if (duplicate) {
-      alert("This course already exists");
-      return;
-    }
-
-    
-    if (editingId) {
-      await api.put(`/courses/${editingId}`, form);
-      alert("Course updated");
-    } else {
-      await api.post("/courses", form);
-      alert("Course created");
-    }
-
-    setForm({
-      courseCode: "",
-      courseName: "",
-      section: "",
-      semester: ""
-    });
-
-    setEditingId(null);
-    loadData();
+  if (
+    !courseCode.trim() ||
+    !courseName.trim() ||
+    !section ||
+    !semester
+  ) {
+    alert("All fields are required");
+    return;
   }
+
+  const courseCodeRegex = /^[A-Z]{3,4}\d{3}$/;
+  if (!courseCodeRegex.test(courseCode)) {
+    alert("Course code must be like COMP304");
+    return;
+  }
+
+  if (courseName.trim().length < 3) {
+    alert("Course name must be at least 3 characters");
+    return;
+  }
+
+  if (!sections.includes(section)) {
+    alert("Invalid section selected");
+    return;
+  }
+
+  if (!semesters.includes(semester)) {
+    alert("Invalid semester selected");
+    return;
+  }
+
+  // 6️⃣ DUPLICATE COURSE CHECK (your logic kept)
+  const duplicatedCourse = courses.some(
+    c =>
+      c.courseCode === courseCode &&
+      c.section === section &&
+      c.semester === semester &&
+      c._id !== editingId
+  );
+
+  if (duplicatedCourse) {
+    alert("This course with the same section and semester already exists.");
+    return;
+  }
+
+  // ✅ SAVE
+  if (editingId) {
+    await api.put(`/courses/${editingId}`, form);
+    alert("Course updated");
+  } else {
+    await api.post("/courses", form);
+    alert("Course created");
+  }
+
+  setForm({
+    courseCode: "",
+    courseName: "",
+    section: "",
+    semester: ""
+  });
+
+  setEditingId(null);
+  loadData();
+}
 
   async function deleteCourse(courseId) {
     if (!window.confirm("Are you sure?")) return;
@@ -110,62 +130,29 @@ if (!semesterRegex.test(semester)) {
 
   async function dropCourse(courseId, studentId) {
     if (!window.confirm("Drop this course?")) return;
+
     await api.delete(`/courses/${courseId}/students/${studentId}`);
     alert("Course dropped");
     loadData();
   }
 
   async function addStudent(courseId) {
-    let studentId;
-
-    if (role === "admin") {
-      studentId = selectedStudent[courseId];
-      if (!studentId) {
-        alert("Select a student first");
-        return;
-      }
-    } else {
-      studentId = loggedStudentId;
-    }
-
-    let student;
-
-    if (role === "admin") {
-      student = students.find(s => s._id === studentId);
-    } else {
-      const res = await api.get("/auth/me", { withCredentials: true });
-      student = res.data;
-    }
-
-    if (!student) {
-      alert("Student not found");
-      return;
-    }
-
-    if (!student.program) {
-      alert("Student must be assigned to a program before enrolling");
-      return;
-    }
-
-    const courseToEnroll = courses.find(c => c._id === courseId);
-
-    const alreadyEnrolledSameCode = courses.some(c =>
-      c.courseCode === courseToEnroll.courseCode &&
-      c.students?.some(s => s._id === studentId)
-    );
-
-    if (alreadyEnrolledSameCode) {
-      alert("Student is already enrolled in this course code");
-      return;
-    }
-
-    await api.post(`/courses/${courseId}/students/${studentId}`);
+    await api.post(`/courses/${courseId}/students/${loggedStudentId}`);
     alert("Student added");
+    loadData();
+  }
+
+  async function changeSection(oldCourseId, newCourseId, studentId) {
+    await api.delete(`/courses/${oldCourseId}/students/${studentId}`);
+    await api.post(`/courses/${newCourseId}/students/${studentId}`);
+
+    alert("Section changed");
     loadData();
   }
 
   function handleEdit(course) {
     setEditingId(course._id);
+
     setForm({
       courseCode: course.courseCode || "",
       courseName: course.courseName || "",
@@ -174,6 +161,25 @@ if (!semesterRegex.test(semester)) {
     });
   }
 
+
+  const groupedCourses = Object.values(
+    courses.reduce((acc, course) => {
+      const key = `${course.courseCode}-${course.semester}`;
+
+      if (!acc[key]) {
+        acc[key] = {
+          courseCode: course.courseCode,
+          courseName: course.courseName,
+          semester: course.semester,
+          sections: []
+        };
+      }
+
+      acc[key].sections.push(course);
+      return acc;
+    }, {})
+  );
+
   return (
     <>
       <Navbar />
@@ -181,74 +187,241 @@ if (!semesterRegex.test(semester)) {
       <div style={{ padding: "20px" }}>
         <h1>Courses</h1>
 
+        {/* ADMIN CREATE */}
         {role === "admin" && (
           <>
             <h3>{editingId ? "Edit Course" : "Add Course"}</h3>
 
             <form onSubmit={handleSubmit}>
-              <input name="courseCode" placeholder="Course Code" value={form.courseCode} onChange={handleChange} />
-              <input name="courseName" placeholder="Course Name" value={form.courseName} onChange={handleChange} />
-              <input name="section" placeholder="Section" value={form.section} onChange={handleChange} />
-              <input name="semester" placeholder="Semester" value={form.semester} onChange={handleChange} />
-              <button type="submit">{editingId ? "Update Course" : "Create Course"}</button>
+              <input
+                name="courseCode"
+                placeholder="Course Code"
+                value={form.courseCode}
+                onChange={handleChange}
+              />
+
+              <input
+                name="courseName"
+                placeholder="Course Name"
+                value={form.courseName}
+                onChange={handleChange}
+              />
+
+              <select
+                name="section"
+                value={form.section}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select Section --</option>
+                {sections.map(sec => (
+                  <option key={sec}>{sec}</option>
+                ))}
+              </select>
+
+              <select
+                name="semester"
+                value={form.semester}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select Semester --</option>
+                {semesters.map(sem => (
+                  <option key={sem}>{sem}</option>
+                ))}
+              </select>
+
+              <button type="submit">
+                {editingId ? "Update Course" : "Create Course"}
+              </button>
             </form>
 
             <hr />
           </>
         )}
 
-        {courses.map(course => (
-          <div key={course._id} style={{ border: "1px solid black", marginBottom: "20px", padding: "10px" }}>
-            <h3>{course.courseCode} - {course.courseName}</h3>
-            <p>Section: {course.section} | Semester: {course.semester}</p>
+        {/* COURSES */}
+        {groupedCourses.map(group => {
+          const activeCourse =
+            group.sections.find(
+              s => s._id === selectedSection[group.courseCode]
+            ) || group.sections[0];
 
-            {role === "admin" && (
-              <>
-                <button onClick={() => handleEdit(course)}>Edit</button>
-                <button onClick={() => deleteCourse(course._id)}>Delete</button>
-              </>
-            )}
+          const enrolledSection = group.sections.find(section =>
+            section.students?.some(s => s._id === loggedStudentId)
+          );
 
-            <p>Students:</p>
-            <ul>
-              {course.students?.map(s => (
-                <li key={s._id}>
-                  {s.firstName} {s.lastName}
-                  <button style={{ marginLeft: "10px" }} onClick={() => dropCourse(course._id, s._id)}>
-                    Drop
+          return (
+            <div
+              key={group.courseCode + group.semester}
+              style={{
+                border: "1px solid black",
+                marginBottom: "20px",
+                padding: "10px"
+              }}
+            >
+              <h3>
+                {group.courseCode} - {group.courseName}
+              </h3>
+
+              <p>Semester: {group.semester}</p>
+
+              {/* SECTION SELECT */}
+              <select
+                value={activeCourse._id}
+                onChange={e =>
+                  setSelectedSection({
+                    ...selectedSection,
+                    [group.courseCode]: e.target.value
+                  })
+                }
+              >
+                {group.sections.map(sec => (
+                  <option key={sec._id} value={sec._id}>
+                    Section {sec.section}
+                  </option>
+                ))}
+              </select>
+
+              {/* CHANGE SECTION */}
+              {role === "student" &&
+                enrolledSection &&
+                enrolledSection._id !== activeCourse._id && (
+                  <button
+                    style={{ marginLeft: "10px" }}
+                    onClick={() =>
+                      changeSection(
+                        enrolledSection._id,
+                        activeCourse._id,
+                        loggedStudentId
+                      )
+                    }
+                  >
+                    Change to this section
                   </button>
-                </li>
-              ))}
-            </ul>
+                )}
 
-            {role === "student" &&
-              !course.students?.some(s => s._id === loggedStudentId) && (
-                <button onClick={() => addStudent(course._id)}>Enroll in this course</button>
+              {/* ADMIN ACTIONS */}
+              {role === "admin" && (
+  <>
+    <button onClick={() => handleEdit(activeCourse)}>
+      Edit
+    </button>
+
+    <button onClick={() => deleteCourse(activeCourse._id)}>
+      Delete
+    </button>
+
+    {/* ADD STUDENT (ADMIN) */}
+    <div style={{ marginTop: "10px" }}>
+      <select
+        value={selectedStudent[activeCourse._id] || ""}
+        onChange={(e) =>
+          setSelectedStudent({
+            ...selectedStudent,
+            [activeCourse._id]: e.target.value,
+          })
+        }
+      >
+        <option value="">-- Select Student --</option>
+        {students
+          .filter(
+            (student) =>
+              !activeCourse.students?.some(
+                (s) => s._id === student._id
+              )
+          )
+          .map((student) => (
+            <option key={student._id} value={student._id}>
+              {student.firstName} {student.lastName}
+            </option>
+          ))}
+      </select>
+
+      <button
+  onClick={async () => {
+    const studentId = selectedStudent[activeCourse._id];
+    if (!studentId) return alert("Select a student");
+
+    // 🔎 Find selected student
+    const student = students.find(s => s._id === studentId);
+
+    // 🚨 Check if student has program
+    if (!student?.program || student.program.trim() === "") {
+      alert("Student has no program and cannot be added.");
+      return;
+    }
+
+    // 🔎 Check if student already in another section
+    const alreadyEnrolled = group.sections.some(section =>
+      section.students?.some(s => s._id === studentId)
+    );
+
+    if (alreadyEnrolled) {
+      alert("Student is already enrolled in another section of this course.");
+      return;
+    }
+
+    await api.post(
+      `/courses/${activeCourse._id}/students/${studentId}`
+    );
+
+    alert("Student added");
+    loadData();
+  }}
+  style={{ marginLeft: "5px" }}
+>
+  Add Student
+</button>
+
+
+    </div>
+  </>
+)}
+
+
+              <p>Students:</p>
+
+              <ul>
+  {activeCourse.students?.map(s => (
+    <li key={s._id}>
+      {s.firstName} {s.lastName}
+
+      {/* ADMIN can drop anyone */}
+      {role === "admin" && (
+        <button
+          onClick={() =>
+            dropCourse(activeCourse._id, s._id)
+          }
+        >
+          Drop
+        </button>
+      )}
+
+      {/* STUDENT can drop only himself */}
+      {role === "student" && s._id === loggedStudentId && (
+        <button
+          onClick={() =>
+            dropCourse(activeCourse._id, s._id)
+          }
+        >
+          Drop
+        </button>
+      )}
+    </li>
+  ))}
+</ul>
+
+
+              {/* ENROLL */}
+              {role === "student" && !enrolledSection && (
+                <button onClick={() => addStudent(activeCourse._id)}>
+                  Enroll in this course
+                </button>
               )}
-
-            {role === "admin" && (
-              <>
-                <select
-                  onChange={e =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      [course._id]: e.target.value
-                    })
-                  }
-                >
-                  <option value="">-- Select Student --</option>
-                  {students.map(s => (
-                    <option key={s._id} value={s._id}>
-                      {s.firstName} {s.lastName}
-                    </option>
-                  ))}
-                </select>
-
-                <button onClick={() => addStudent(course._id)}>Add Student</button>
-              </>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </>
   );
