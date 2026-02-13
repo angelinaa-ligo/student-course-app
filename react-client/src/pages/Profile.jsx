@@ -6,13 +6,17 @@ export default function Profile() {
   const studentId = localStorage.getItem("studentId");
 
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    favoriteTopic: "",
-    strongestSkill: "",
-    password: ""
-  });
+  firstName: "",
+  lastName: "",
+  address: "",
+  city: "",
+  phoneNumber: "",
+  email: "",
+  favoriteTopic: "",
+  strongestSkill: "",
+  password: ""
+});
+
 
   useEffect(() => {
     loadProfile();
@@ -22,13 +26,17 @@ export default function Profile() {
     try {
       const res = await api.get(`/students/${studentId}`);
       setForm({
-        firstName: res.data.firstName,
-        lastName: res.data.lastName,
-        email: res.data.email,
-        favoriteTopic: res.data.favoriteTopic || "",
-        strongestSkill: res.data.strongestSkill || "",
-        password: ""
-      });
+  firstName: res.data.firstName,
+  lastName: res.data.lastName,
+  address: res.data.address || "",
+  city: res.data.city || "",
+  phoneNumber: res.data.phoneNumber || "",
+  email: res.data.email,
+  favoriteTopic: res.data.favoriteTopic || "",
+  strongestSkill: res.data.strongestSkill || "",
+  password: ""
+});
+
     } catch {
       alert("Error loading profile");
     }
@@ -60,6 +68,9 @@ export default function Profile() {
           <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" />
           <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" />
           <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
+          <input name="address" value={form.address} onChange={handleChange} placeholder="Address" />
+          <input name="city" value={form.city} onChange={handleChange} placeholder="City" />
+          <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" />
 
           <input name="favoriteTopic" value={form.favoriteTopic} onChange={handleChange} placeholder="Favorite Topic" />
           <input name="strongestSkill" value={form.strongestSkill} onChange={handleChange} placeholder="Strongest Skill" />

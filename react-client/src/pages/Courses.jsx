@@ -22,13 +22,21 @@ export default function Courses() {
     loadData();
   }, []);
 
-  async function loadData() {
+ async function loadData() {
+  try {
     const coursesRes = await api.get("/courses");
-    const studentsRes = await api.get("/students");
-
     setCourses(coursesRes.data);
-    setStudents(studentsRes.data);
+
+    if (role === "admin") {
+      const studentsRes = await api.get("/students");
+      setStudents(studentsRes.data);
+    }
+
+  } catch (err) {
+    console.error(err);
   }
+}
+
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -85,7 +93,14 @@ export default function Courses() {
     studentId = loggedStudentId;
   }
 
-  const student = students.find(s => s._id === studentId);
+  let student;
+
+if (role === "admin") {
+  student = students.find(s => s._id === studentId);
+} else {
+  const res = await api.get("/auth/me", { withCredentials: true });
+  student = res.data;
+}
   const courseToEnroll = courses.find(c => c._id === courseId);
 
   
@@ -120,6 +135,16 @@ let visibleCourses = courses;
 
 
 console.log(courses);
+function handleEdit(course) {
+  setEditingId(course._id);
+
+  setForm({
+    courseCode: course.courseCode || "",
+    courseName: course.courseName || "",
+    section: course.section || "",
+    semester: course.semester || ""
+  });
+}
 
   return (
     <>
@@ -188,9 +213,10 @@ console.log(courses);
             {/* ADMIN ACTIONS */}
             {role === "admin" && (
               <>
-                <button onClick={() => setEditingId(course._id)}>
-                  Edit
-                </button>
+                <button onClick={() => handleEdit(course)}>
+  Edit
+</button>
+
                 <button onClick={() => deleteCourse(course._id)}>
                   Delete
                 </button>

@@ -7,7 +7,7 @@ export default function Dashboard() {
   const [courses, setCourses] = useState([]);
 
   const studentId = localStorage.getItem("studentId");
-  const role = localStorage.getItem("role"); // "student" ou "admin"
+  const role = localStorage.getItem("role"); 
 
   useEffect(() => {
     loadDashboard();
@@ -16,20 +16,20 @@ export default function Dashboard() {
   async function loadDashboard() {
     try {
 
-      // 🔹 Se for ADMIN
+      
       if (role === "admin") {
         const coursesRes = await api.get("/courses");
         setCourses(coursesRes.data);
         return;
       }
 
-      // 🔹 Se for STUDENT
+      
       const studentRes = await api.get(`/students/${studentId}`);
       setStudent(studentRes.data);
 
       const coursesRes = await api.get("/courses");
 
-      // Agora pega TODOS os cursos onde o aluno está
+      
       const enrolledCourses = coursesRes.data.filter(course =>
         course.students?.some(s => s._id === studentId)
       );
@@ -54,11 +54,22 @@ export default function Dashboard() {
         {role === "student" && student && (
           <>
             <h2>Student Info</h2>
-            <p><b>Name:</b> {student.firstName} {student.lastName}</p>
-            <p><b>Email:</b> {student.email}</p>
-            <p><b>Student #:</b> {student.studentNumber}</p>
-            <p><b>Program:</b> {student.program || "Not Assigned"}</p>
-            <hr />
+
+<p><b>Student #:</b> {student.studentNumber}</p>
+<p><b>Name:</b> {student.firstName} {student.lastName}</p>
+<p><b>Email:</b> {student.email}</p>
+
+<p><b>Address:</b> {student.address || "Not Provided"}</p>
+<p><b>City:</b> {student.city || "Not Provided"}</p>
+<p><b>Phone:</b> {student.phoneNumber || "Not Provided"}</p>
+
+<p><b>Program:</b> {student.program || "Not Assigned"}</p>
+
+<p><b>Favorite Topic:</b> {student.favoriteTopic || "Not Provided"}</p>
+<p><b>Strongest Skill:</b> {student.strongestSkill || "Not Provided"}</p>
+
+<hr />
+
 
             <h2>Enrollment</h2>
 

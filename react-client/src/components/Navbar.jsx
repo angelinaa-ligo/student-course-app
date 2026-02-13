@@ -1,14 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
-
+import api from "../services/api";
 export default function Navbar() {
   const navigate = useNavigate();
   const role = localStorage.getItem("role");
 
-  function handleLogout() {
-    localStorage.clear();
-    navigate("/");
-  }
+  async function handleLogout() {
+  await api.post("/auth/logout");
+  navigate("/");
+}
 
   return (
     <nav className="navbar">

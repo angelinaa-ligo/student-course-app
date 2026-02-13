@@ -13,11 +13,15 @@ export default function Admin() {
   password: "",
   firstName: "",
   lastName: "",
+  address: "",
+  city: "",
+  phoneNumber: "",
   email: "",
   program: "",
   favoriteTopic: "",
   strongestSkill: ""
 });
+
 
   const programs = [
   "Software Engineering",
@@ -73,15 +77,18 @@ export default function Admin() {
     }
 
     setForm({
-      studentNumber: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      program: "",
-      favoriteTopic: "",
-      strongestSkill: ""
-    });
+  studentNumber: "",
+  password: "",
+  firstName: "",
+  lastName: "",
+  address: "",
+  city: "",
+  phoneNumber: "",
+  email: "",
+  program: "",
+  favoriteTopic: "",
+  strongestSkill: ""
+});
 
     setSelectedCourse("");
     setEditingId(null);
@@ -102,18 +109,23 @@ export default function Admin() {
   }
 
   function editStudent(student) {
-    setForm({
-      studentNumber: student.studentNumber,
-      password: "",
-      firstName: student.firstName,
-      lastName: student.lastName,
-      email: student.email,
-      favoriteTopic: student.favoriteTopic || "",
-      strongestSkill: student.strongestSkill || ""
-    });
+  setForm({
+    studentNumber: student.studentNumber,
+    password: "",
+    firstName: student.firstName,
+    lastName: student.lastName,
+    address: student.address || "",
+    city: student.city || "",
+    phoneNumber: student.phoneNumber || "",
+    email: student.email,
+    program: student.program || "",
+    favoriteTopic: student.favoriteTopic || "",
+    strongestSkill: student.strongestSkill || ""
+  });
 
-    setEditingId(student._id);
-  }
+  setEditingId(student._id);
+}
+
 
   return (
     <>
@@ -129,6 +141,10 @@ export default function Admin() {
           <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} />
           <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} />
           <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} />
+          <input name="address" placeholder="Address" value={form.address} onChange={handleChange} />
+          <input name="city" placeholder="City" value={form.city} onChange={handleChange} />
+          <input name="phoneNumber" placeholder="Phone Number" value={form.phoneNumber} onChange={handleChange} />
+
           <input name="email" placeholder="Email" value={form.email} onChange={handleChange} />
           <input name="favoriteTopic" placeholder="Favorite Topic" value={form.favoriteTopic} onChange={handleChange} />
           <input name="strongestSkill" placeholder="Strongest Skill" value={form.strongestSkill} onChange={handleChange} />
@@ -170,22 +186,35 @@ export default function Admin() {
 
         <table border="1" cellPadding="10">
           <thead>
-            <tr>
-              <th>Student #</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Program</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+  <tr>
+    <th>Student #</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Email</th>
+    <th>Address</th>
+    <th>City</th>
+    <th>Phone</th>
+    <th>Program</th>
+    <th>Favorite Topic</th>
+    <th>Strongest Skill</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+
 
           <tbody>
   {students.map((s) => (
     <tr key={s._id}>
       <td>{s.studentNumber}</td>
-      <td>{s.firstName} {s.lastName}</td>
+      <td>{s.firstName}</td>
+      <td>{s.lastName}</td>
       <td>{s.email}</td>
-      <td>{s.program || "Not Assigned"}</td>
+      <td>{s.address || "-"}</td>
+      <td>{s.city || "-"}</td>
+      <td>{s.phoneNumber || "-"}</td>
+      <td>{s.program || "-"}</td>
+      <td>{s.favoriteTopic || "-"}</td>
+      <td>{s.strongestSkill || "-"}</td>
       <td>
         <button onClick={() => editStudent(s)}>Edit</button>
         <button onClick={() => deleteStudent(s._id)}>Delete</button>
@@ -193,6 +222,7 @@ export default function Admin() {
     </tr>
   ))}
 </tbody>
+
         </table>
       </div>
     </>

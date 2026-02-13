@@ -1,4 +1,5 @@
-const Student = require('../models/student');
+const bcrypt = require("bcryptjs");
+const Student = require("../models/student");
 
 // create
 exports.createStudent = async (req, res) => {
@@ -36,12 +37,24 @@ exports.getStudentById = async (req, res) => {
 // update
 exports.updateStudent = async (req, res) => {
   try {
+    const { password, ...otherFields } = req.body;
+
+    const updateData = { ...otherFields };
+
+    
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+
     const student = await Student.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true }
     );
+
     res.json(student);
+
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

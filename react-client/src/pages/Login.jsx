@@ -11,29 +11,28 @@ export default function Login() {
  async function handleSubmit(e) {
   e.preventDefault();
 
-  // ADMIN TEMP
-  if (email === "admin@test.com" && password === "1234") {
-    localStorage.setItem("role", "admin");
-    navigate("/admin");
-    return;
-  }
-
   try {
-    
-    const res = await api.get("/students");
-    const student = res.data.find(s => s.email === email);
+    await api.post(
+      "/auth/login",
+      { email, password },
+      { withCredentials: true }
+    );
 
-    if (!student) {
-      alert("Student not found");
-      return;
+    
+    const me = await api.get("/auth/me", {
+      withCredentials: true,
+    });
+
+    localStorage.setItem("studentId", me.data.id);
+localStorage.setItem("role", me.data.role);
+    if (me.data.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
     }
 
-    localStorage.setItem("role", "student");
-    localStorage.setItem("studentId", student._id);
-
-    navigate("/dashboard");
   } catch (err) {
-    alert("Login failed");
+    alert("Invalid email or password");
   }
 }
 
