@@ -12,7 +12,9 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <h2>Student System</h2>
+      <h2 onClick={() => navigate("/dashboard")}>
+  Student System
+</h2>
 
       <div className="links">
         <Link to="/dashboard">Dashboard</Link>

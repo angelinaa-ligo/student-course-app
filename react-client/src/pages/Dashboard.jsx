@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
+import "../pagesCss/Dashboard.css";
 
 export default function Dashboard() {
   const [student, setStudent] = useState(null);
@@ -47,74 +48,72 @@ export default function Dashboard() {
     <>
       <Navbar />
 
-      <div style={{ padding: "20px" }}>
-        <h1>Dashboard</h1>
+      <div className="dashboard-container">
+        <h1 className="dashboard-title">Dashboard</h1>
 
         {/* 🔹 STUDENT VIEW */}
         {role === "student" && student && (
           <>
-            <h2>Student Info</h2>
+  <h2 className="section-title">Student Profile</h2>
 
-<p><b>Student #:</b> {student.studentNumber}</p>
-<p><b>Name:</b> {student.firstName} {student.lastName}</p>
-<p><b>Email:</b> {student.email}</p>
+  <div className="dashboard-card">
+    <div className="info-grid">
+      <div className="info-item"><b>Student #:</b> {student.studentNumber}</div>
+      <div className="info-item"><b>Name:</b> {student.firstName} {student.lastName}</div>
+      <div className="info-item"><b>Email:</b> {student.email}</div>
+      <div className="info-item"><b>Address:</b> {student.address || "Not Provided"}</div>
+      <div className="info-item"><b>City:</b> {student.city || "Not Provided"}</div>
+      <div className="info-item"><b>Phone:</b> {student.phoneNumber || "Not Provided"}</div>
+      <div className="info-item"><b>Program:</b> {student.program || "Not Assigned"}</div>
+      <div className="info-item"><b>Favorite Topic:</b> {student.favoriteTopic || "Not Provided"}</div>
+      <div className="info-item"><b>Strongest Skill:</b> {student.strongestSkill || "Not Provided"}</div>
+    </div>
+  </div>
 
-<p><b>Address:</b> {student.address || "Not Provided"}</p>
-<p><b>City:</b> {student.city || "Not Provided"}</p>
-<p><b>Phone:</b> {student.phoneNumber || "Not Provided"}</p>
+  <h2 className="section-title">Enrollment</h2>
 
-<p><b>Program:</b> {student.program || "Not Assigned"}</p>
-
-<p><b>Favorite Topic:</b> {student.favoriteTopic || "Not Provided"}</p>
-<p><b>Strongest Skill:</b> {student.strongestSkill || "Not Provided"}</p>
-
-<hr />
-
-
-            <h2>Enrollment</h2>
-
-            {courses.length > 0 ? (
-              courses.map(course => (
-                <div key={course._id} style={{ marginBottom: "15px" }}>
-                  <p><b>Course:</b> {course.courseCode}</p>
-                  <p><b>Name:</b> {course.courseName}</p>
-                  <p><b>Section:</b> {course.section}</p>
-                  <p><b>Semester:</b> {course.semester}</p>
-                  <hr />
-                </div>
-              ))
-            ) : (
-              <p>Not enrolled in any course</p>
-            )}
-          </>
+  {courses.length > 0 ? (
+    courses.map(course => (
+      <div key={course._id} className="course-card">
+        <p><b>{course.courseCode}</b> - {course.courseName}</p>
+        <p>Section: {course.section}</p>
+        <p>Semester: {course.semester}</p>
+      </div>
+    ))
+  ) : (
+    <div className="dashboard-card">
+      Not enrolled in any course
+    </div>
+  )}
+</>
         )}
 
         {/* 🔹 ADMIN VIEW */}
         {role === "admin" && (
           <>
-            <h2>All Courses</h2>
+  <h2 className="section-title">All Courses</h2>
 
-            {courses.map(course => (
-              <div key={course._id} style={{ marginBottom: "20px" }}>
-                <h3>
-                  {course.courseCode} - {course.section}
-                </h3>
-                <p><b>Name:</b> {course.courseName}</p>
-                <p><b>Semester:</b> {course.semester}</p>
+  {courses.map(course => (
+    <div key={course._id} className="dashboard-card">
+      <h3>{course.courseCode} - Section {course.section}</h3>
+      <p><b>Name:</b> {course.courseName}</p>
+      <p><b>Semester:</b> {course.semester}</p>
 
-                <b>Students:</b>
-                <ul>
-                  {course.students?.map(s => (
-                    <li key={s._id}>
-                      {s.firstName} {s.lastName}
-                    </li>
-                  ))}
-                </ul>
-
-                <hr />
-              </div>
-            ))}
-          </>
+      <b>Students:</b>
+      <ul>
+        {course.students?.length > 0 ? (
+          course.students.map(s => (
+            <li key={s._id}>
+              {s.firstName} {s.lastName}
+            </li>
+          ))
+        ) : (
+          <li>No students enrolled</li>
+        )}
+      </ul>
+    </div>
+  ))}
+</>
         )}
       </div>
     </>

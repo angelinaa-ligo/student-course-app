@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
-
+import "../pagesCss/Profile.css";
 export default function Profile() {
   const studentId = localStorage.getItem("studentId");
 
@@ -94,25 +94,27 @@ export default function Profile() {
     <>
       <Navbar />
 
-      <div style={{ padding: "20px" }}>
-        <h1>Edit Profile</h1>
+      <div className="profile-container">
+  <h1 className="profile-title">Edit Profile</h1>
 
-        <form onSubmit={handleSubmit}>
-          <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" />
-          <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" />
-          <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
-          <input name="address" value={form.address} onChange={handleChange} placeholder="Address" />
-          <input name="city" value={form.city} onChange={handleChange} placeholder="City" />
-          <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" />
+  <form onSubmit={handleSubmit} className="profile-form">
+    <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" />
+    <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" />
+    <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
+    <input name="address" value={form.address} onChange={handleChange} placeholder="Address" />
+    <input name="city" value={form.city} onChange={handleChange} placeholder="City" />
+    <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="Phone Number" />
 
-          <input name="favoriteTopic" value={form.favoriteTopic} onChange={handleChange} placeholder="Favorite Topic" />
-          <input name="strongestSkill" value={form.strongestSkill} onChange={handleChange} placeholder="Strongest Skill" />
+    <input name="favoriteTopic" value={form.favoriteTopic} onChange={handleChange} placeholder="Favorite Topic" />
+    <input name="strongestSkill" value={form.strongestSkill} onChange={handleChange} placeholder="Strongest Skill" />
 
-          <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="New Password" />
+    <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="New Password" />
 
-          <button type="submit">Save Changes</button>
-        </form>
-      </div>
+    <button type="submit" className="profile-button">
+      Save Changes
+    </button>
+  </form> 
+</div>
     </>
   );
 }

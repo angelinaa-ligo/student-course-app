@@ -1,0 +1,99 @@
+/* Background */
+.admin-container {
+  min-height: 100vh;
+  background: #141414;
+  color: #ffffff;
+  padding: 40px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Titles */
+.admin-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.admin-subtitle {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #e50914;
+}
+
+/* Form Card */
+.admin-form {
+  background: #1f1f1f;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.2);
+}
+
+/* Inputs */
+.admin-form input,
+.admin-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #2b2b2b;
+  color: white;
+  outline: none;
+  transition: 0.3s;
+}
+
+.admin-form input:focus,
+.admin-form select:focus {
+  border-color: #e50914;
+  box-shadow: 0 0 5px #e50914;
+}
+
+/* Buttons */
+.admin-btn {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-right: 5px;
+}
+
+.admin-btn:hover {
+  background: #b20710;
+  transform: scale(1.05);
+}
+
+/* Table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1f1f1f;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.admin-table th {
+  background: #e50914;
+  padding: 12px;
+  text-align: left;
+}
+
+.admin-table td {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+}
+
+.admin-table tr:hover {
+  background: #2a2a2a;
+  transition: 0.3s;
+}
+
+/* Error */
+.admin-error {
+  color: #ff4c4c;
+  margin-bottom: 10px;
+  font-weight: bold;
+}

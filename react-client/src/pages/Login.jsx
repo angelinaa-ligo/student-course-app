@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-
+import "../pagesCss/Login.css";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,48 +62,30 @@ export default function Login() {
   }
 
   return (
-    <div style={container}>
-      <form onSubmit={handleSubmit} style={form}>
-        <h2>Login</h2>
+  <div className="login-container">
+    <form onSubmit={handleSubmit} className="login-form">
+      <h2>Login</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+      {error && <p className="login-error">{error}</p>}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-    </div>
-  );
+      <button type="submit" className="login-button" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
+    </form>
+  </div>
+);
 }
-// Tempoary css
-const container = {
-  height: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  background: "#f1f5f9",
-};
-
-const form = {
-  background: "white",
-  padding: "30px",
-  borderRadius: "10px",
-  width: "300px",
-  display: "flex",
-  flexDirection: "column",
-  gap: "15px",
-};

@@ -1,0 +1,130 @@
+.courses-container {
+  padding: 30px 40px;
+  color: white;
+  min-height: 100vh;
+  background-color: #141414;
+}
+
+/* TITLE */
+.courses-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+/* FORM (ADMIN) */
+.course-form {
+  background: #1f1f1f;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.course-form input,
+.course-form select {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #2a2a2a;
+  color: white;
+}
+
+.course-form input::placeholder {
+  color: #aaa;
+}
+
+.course-form button {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.course-form button:hover {
+  background: #ff1f1f;
+}
+
+/* COURSE GRID */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* COURSE CARD */
+.course-card {
+  background: #1f1f1f;
+  border-radius: 12px;
+  padding: 20px;
+  transition: 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.course-card:hover {
+  transform: scale(1.02);
+}
+
+/* CARD HEADER */
+.course-header {
+  margin-bottom: 10px;
+}
+
+.course-code {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.course-name {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+/* INFO */
+.course-info {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+/* STUDENT LIST */
+.student-list {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.student-list li {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+/* BUTTONS */
+.course-actions button {
+  background: #333;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  margin-right: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.course-change {
+  margin-left: 10px;
+  background: #444;
+}
+.course-actions button:hover {
+  background: #555;
+}
+
+.enroll-btn {
+  background: #e50914 !important;
+}
+
+.enroll-btn:hover {
+  background: #ff1f1f !important;
+}

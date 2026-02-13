@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
-
+import "../pagesCss/Courses.css";
 export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState({});
   const [editingId, setEditingId] = useState(null);
   const [selectedSection, setSelectedSection] = useState({});
-
+const [currentStudent, setCurrentStudent] = useState(null);
   const sections = ["001", "002", "003", "004", "005"];
 
   const semesters = [
@@ -43,6 +43,10 @@ export default function Courses() {
         const studentsRes = await api.get("/students");
         setStudents(studentsRes.data);
       }
+      if (role === "student") {
+      const studentRes = await api.get(`/students/${loggedStudentId}`);
+      setCurrentStudent(studentRes.data);
+    }
     } catch (err) {
       console.error(err);
     }
@@ -137,10 +141,15 @@ export default function Courses() {
   }
 
   async function addStudent(courseId) {
-    await api.post(`/courses/${courseId}/students/${loggedStudentId}`);
-    alert("Student added");
-    loadData();
+  if (!currentStudent?.program || currentStudent.program.trim() === "") {
+    alert("You cannot enroll because you have no program assigned.");
+    return;
   }
+
+  await api.post(`/courses/${courseId}/students/${loggedStudentId}`);
+  alert("Student added");
+  loadData();
+}
 
   async function changeSection(oldCourseId, newCourseId, studentId) {
     await api.delete(`/courses/${oldCourseId}/students/${studentId}`);
@@ -184,15 +193,15 @@ export default function Courses() {
     <>
       <Navbar />
 
-      <div style={{ padding: "20px" }}>
-        <h1>Courses</h1>
+      <div className="courses-container">
+        <h1 className="courses-title">Courses</h1>
 
         {/* ADMIN CREATE */}
         {role === "admin" && (
           <>
             <h3>{editingId ? "Edit Course" : "Add Course"}</h3>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="course-form">
               <input
                 name="courseCode"
                 placeholder="Course Code"
@@ -231,7 +240,7 @@ export default function Courses() {
                 ))}
               </select>
 
-              <button type="submit">
+              <button type="submit" className="enroll-btn">
                 {editingId ? "Update Course" : "Create Course"}
               </button>
             </form>
@@ -241,6 +250,7 @@ export default function Courses() {
         )}
 
         {/* COURSES */}
+        <div className="courses-grid">
         {groupedCourses.map(group => {
           const activeCourse =
             group.sections.find(
@@ -252,19 +262,23 @@ export default function Courses() {
           );
 
           return (
-            <div
-              key={group.courseCode + group.semester}
-              style={{
-                border: "1px solid black",
-                marginBottom: "20px",
-                padding: "10px"
-              }}
-            >
-              <h3>
-                {group.courseCode} - {group.courseName}
-              </h3>
+  <div
+    key={group.courseCode + group.semester}
+    className="course-card"
+  >
+              <div className="course-header">
+  <div className="course-code">
+    {group.courseCode}
+  </div>
 
-              <p>Semester: {group.semester}</p>
+  <div className="course-name">
+    {group.courseName}
+  </div>
+</div>
+
+<div className="course-info">
+  Semester: {group.semester}
+</div>
 
               {/* SECTION SELECT */}
               <select
@@ -287,8 +301,7 @@ export default function Courses() {
               {role === "student" &&
                 enrolledSection &&
                 enrolledSection._id !== activeCourse._id && (
-                  <button
-                    style={{ marginLeft: "10px" }}
+                  <button className="course-actions"
                     onClick={() =>
                       changeSection(
                         enrolledSection._id,
@@ -304,7 +317,7 @@ export default function Courses() {
               {/* ADMIN ACTIONS */}
               {role === "admin" && (
   <>
-    <button onClick={() => handleEdit(activeCourse)}>
+    <button  onClick={() => handleEdit(activeCourse)}>
       Edit
     </button>
 
@@ -382,7 +395,7 @@ export default function Courses() {
 
               <p>Students:</p>
 
-              <ul>
+              <ul className="student-list">
   {activeCourse.students?.map(s => (
     <li key={s._id}>
       {s.firstName} {s.lastName}
@@ -415,7 +428,7 @@ export default function Courses() {
 
               {/* ENROLL */}
               {role === "student" && !enrolledSection && (
-                <button onClick={() => addStudent(activeCourse._id)}>
+                <button className="enroll-btn" onClick={() => addStudent(activeCourse._id)}>
                   Enroll in this course
                 </button>
               )}
@@ -423,6 +436,9 @@ export default function Courses() {
           );
         })}
       </div>
+      </div>
     </>
   );
+  
 }
+

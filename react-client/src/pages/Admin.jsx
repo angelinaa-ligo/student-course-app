@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
+import "../pagesCss/Admin.css";
 
 export default function Admin() {
   const [students, setStudents] = useState([]);
@@ -152,15 +153,17 @@ export default function Admin() {
     <>
       <Navbar />
 
-      <div style={{ padding: "20px" }}>
-        <h1>Admin Panel</h1>
+      <div className="admin-container">
+        <h1 className="admin-title">Admin Panel</h1>
 
-        <h3>{editingId ? "Edit Student" : "Add Student"}</h3>
+        <h3 className="admin-subtitle">
+  {editingId ? "Edit Student" : "Add Student"}
+</h3>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="admin-form">
 
           {error && (
-            <p style={{ color: "red", marginBottom: "10px" }}>
+            <p className="admin-error">
               {error}
             </p>
           )}
@@ -192,7 +195,7 @@ export default function Admin() {
             ))}
           </select>
 
-          <button type="submit">
+          <button type="submit" className="admin-btn">
             {editingId ? "Update Student" : "Create Student"}
           </button>
         </form>
@@ -201,7 +204,7 @@ export default function Admin() {
 
         <h3>Students</h3>
 
-        <table border="1" cellPadding="10">
+        <table className="admin-table">
           <thead>
             <tr>
               <th>Student #</th>
@@ -231,8 +234,13 @@ export default function Admin() {
                 <td>{s.favoriteTopic || "-"}</td>
                 <td>{s.strongestSkill || "-"}</td>
                 <td>
-                  <button onClick={() => editStudent(s)}>Edit</button>
-                  <button onClick={() => deleteStudent(s._id)}>Delete</button>
+                  <button className="admin-btn" onClick={() => editStudent(s)}>
+  Edit
+</button>
+
+<button className="admin-btn" onClick={() => deleteStudent(s._id)}>
+  Delete
+</button>
                 </td>
               </tr>
             ))}
