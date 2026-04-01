@@ -27,7 +27,8 @@ const [currentStudent, setCurrentStudent] = useState(null);
     courseCode: "",
     courseName: "",
     section: "",
-    semester: ""
+    semester: "",
+    maxStudents: ""
   });
 
   useEffect(() => {
@@ -59,13 +60,14 @@ const [currentStudent, setCurrentStudent] = useState(null);
   async function handleSubmit(e) {
   e.preventDefault();
 
-  const { courseCode, courseName, section, semester } = form;
+  const { courseCode, courseName, section, semester, maxStudents } = form;
 
   if (
     !courseCode.trim() ||
     !courseName.trim() ||
     !section ||
-    !semester
+    !semester ||
+    !maxStudents
   ) {
     alert("All fields are required");
     return;
@@ -91,6 +93,10 @@ const [currentStudent, setCurrentStudent] = useState(null);
     alert("Invalid semester selected");
     return;
   }
+  if (!form.maxStudents || form.maxStudents <= 0) {
+  alert("Max students must be greater than 0");
+  return;
+}
 
   // 6️⃣ DUPLICATE COURSE CHECK (your logic kept)
   const duplicatedCourse = courses.some(
@@ -119,7 +125,8 @@ const [currentStudent, setCurrentStudent] = useState(null);
     courseCode: "",
     courseName: "",
     section: "",
-    semester: ""
+    semester: "",
+    maxStudents: ""
   });
 
   setEditingId(null);
@@ -166,7 +173,8 @@ const [currentStudent, setCurrentStudent] = useState(null);
       courseCode: course.courseCode || "",
       courseName: course.courseName || "",
       section: course.section || "",
-      semester: course.semester || ""
+      semester: course.semester || "",
+      maxStudents: course.maxStudents || ""
     });
   }
 
@@ -239,6 +247,15 @@ const [currentStudent, setCurrentStudent] = useState(null);
                   <option key={sem}>{sem}</option>
                 ))}
               </select>
+              <input
+              type="number"
+               name="maxStudents"
+               placeholder="Max Students"
+               value={form.maxStudents}
+               onChange={handleChange}
+               min="1"
+               required
+               />
 
               <button type="submit" className="enroll-btn">
                 {editingId ? "Update Course" : "Create Course"}
@@ -392,7 +409,9 @@ const [currentStudent, setCurrentStudent] = useState(null);
   </>
 )}
 
-
+<p>
+  Students: {activeCourse.students?.length || 0} / {activeCourse.maxStudents}
+</p>
               <p>Students:</p>
 
               <ul className="student-list">
@@ -428,10 +447,18 @@ const [currentStudent, setCurrentStudent] = useState(null);
 
               {/* ENROLL */}
               {role === "student" && !enrolledSection && (
-                <button className="enroll-btn" onClick={() => addStudent(activeCourse._id)}>
-                  Enroll in this course
-                </button>
-              )}
+  <button
+    className="enroll-btn"
+    disabled={
+      activeCourse.students?.length >= activeCourse.maxStudents
+    }
+    onClick={() => addStudent(activeCourse._id)}
+  >
+    {activeCourse.students?.length >= activeCourse.maxStudents
+      ? "Course Full"
+      : "Enroll in this course"}
+  </button>
+)}
             </div>
           );
         })}
