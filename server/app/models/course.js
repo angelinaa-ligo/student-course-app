@@ -6,6 +6,7 @@ const CourseSchema = new Schema({
   courseName: String,
   section: String,
   semester: String,
+  maxStudents: Number,
   students: [
     { 
         type: Schema.Types.ObjectId, 
