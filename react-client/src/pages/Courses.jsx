@@ -10,6 +10,7 @@ export default function Courses() {
   const [selectedSection, setSelectedSection] = useState({});
 const [currentStudent, setCurrentStudent] = useState(null);
   const sections = ["001", "002", "003", "004", "005"];
+  const [searchTerm, setSearchTerm] = useState("");
 
   const semesters = [
     "Winter 2026",
@@ -188,6 +189,10 @@ const [currentStudent, setCurrentStudent] = useState(null);
       return acc;
     }, {})
   );
+  const filteredCourses = groupedCourses.filter(group =>
+  group.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  group.courseName.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   return (
     <>
@@ -195,6 +200,13 @@ const [currentStudent, setCurrentStudent] = useState(null);
 
       <div className="courses-container">
         <h1 className="courses-title">Courses</h1>
+        <input
+  type="text"
+  placeholder="Search by course code or name..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="course-search"
+/>
 
         {/* ADMIN CREATE */}
         {role === "admin" && (
@@ -251,7 +263,7 @@ const [currentStudent, setCurrentStudent] = useState(null);
 
         {/* COURSES */}
         <div className="courses-grid">
-        {groupedCourses.map(group => {
+        {filteredCourses.map(group => {
           const activeCourse =
             group.sections.find(
               s => s._id === selectedSection[group.courseCode]
