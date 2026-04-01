@@ -128,3 +128,13 @@
 .enroll-btn:hover {
   background: #ff1f1f !important;
 }
+
+.course-search {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  margin: 15px 0 25px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
