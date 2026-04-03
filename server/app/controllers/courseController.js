@@ -98,12 +98,25 @@ exports.addStudentToCourse = async (req, res) => {
 
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+      return res.status(404).json({ message: "Course not found" });
     }
-    if (!course.students.includes(studentId)) {
-      course.students.push(studentId);
-      await course.save();
+
+    // MAX STUDENTS CHECK
+    if (course.students.length >= course.maxStudents) {
+      return res.status(400).json({
+        message: "Course is full. Max enrollment reached."
+      });
     }
+
+    // DUPLICATE STUDENT CHECK
+    if (course.students.includes(studentId)) {
+      return res.status(400).json({
+        message: "Student already enrolled in this course"
+      });
+    }
+
+    course.students.push(studentId);
+    await course.save();
 
     res.json(course);
   } catch (error) {
