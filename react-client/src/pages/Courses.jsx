@@ -381,9 +381,16 @@ const [currentStudent, setCurrentStudent] = useState(null);
       </select>
 
       <button
+  disabled={activeCourse.students?.length >= activeCourse.maxStudents}
   onClick={async () => {
     const studentId = selectedStudent[activeCourse._id];
     if (!studentId) return alert("Select a student");
+
+    // 🚨 MAX ENROLLMENT CHECK
+    if (activeCourse.students.length >= activeCourse.maxStudents) {
+      alert("Course is full");
+      return;
+    }
 
     // 🔎 Find selected student
     const student = students.find(s => s._id === studentId);
@@ -413,9 +420,10 @@ const [currentStudent, setCurrentStudent] = useState(null);
   }}
   style={{ marginLeft: "5px" }}
 >
-  Add Student
+  {activeCourse.students?.length >= activeCourse.maxStudents
+    ? "Course Full"
+    : "Add Student"}
 </button>
-
 
     </div>
   </>
