@@ -4,8 +4,25 @@ const Student = require("../models/student");
 // create
 exports.createStudent = async (req, res) => {
   try {
-    const student = await Student.create(req.body);
+    const { password, ...otherFields } = req.body;
+
+    // Validation
+    if (!password || password.trim().length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long"
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const student = await Student.create({
+      ...otherFields,
+      password: hashedPassword
+    });
+
     res.status(201).json(student);
+
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
