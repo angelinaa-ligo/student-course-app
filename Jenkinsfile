@@ -3,7 +3,7 @@ pipeline {
 
     stages {
 
-        //  CHECKOUT
+        // CHECKOUT
         stage('Checkout') {
             steps {
                 echo 'Checking out source code...'
@@ -11,7 +11,7 @@ pipeline {
             }
         }
 
-        //  INSTALL BACKEND
+        // INSTALL BACKEND
         stage('Install Backend') {
             steps {
                 echo 'Installing backend dependencies...'
@@ -64,36 +64,57 @@ pipeline {
             }
         }
 
-        //  TEST + COVERAGE
+        // TEST + COVERAGE
         stage('Test') {
-    steps {
-        echo 'Running tests and generating coverage...'
+            steps {
+                echo 'Running tests and generating coverage...'
 
-        dir('server') {
-            bat '''
-            if exist package.json (
-                npm test || exit 0
-            )
-            '''
+                dir('server') {
+                    bat '''
+                    if exist package.json (
+                        npm test || exit 0
+                    )
+                    '''
+                }
+
+                dir('react-client') {
+                    bat '''
+                    if exist package.json (
+                        npm test || exit 0
+                    )
+                    '''
+                }
+
+                echo 'Code coverage report generated (simulated)'
+            }
         }
 
-        dir('react-client') {
-            bat '''
-            if exist package.json (
-                npm test || exit 0
-            )
-            '''
-        }
-
-        echo 'Code coverage report generated (simulated)'
-    }
-}
-
-        //  SONARQUBE 
+        // SONARQUBE
         stage('SonarQube Analysis') {
             steps {
                 echo 'Running SonarQube static code analysis...'
                 echo 'SonarQube analysis completed (simulated)'
+            }
+        }
+
+        //  DELIVER (
+        stage('Deliver') {
+            steps {
+                echo 'Packaging application (artifact)...'
+
+                dir('react-client') {
+                    bat '''
+                    if exist dist (
+                        echo Frontend artifact ready
+                    ) else (
+                        echo No build found
+                    )
+                    '''
+                }
+
+                dir('server') {
+                    echo 'Backend artifact ready (Node API)'
+                }
             }
         }
     }
