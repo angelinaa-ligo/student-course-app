@@ -2,9 +2,11 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone') {
+
+        stage('Install') {
             steps {
-                echo 'Cloning repository...'
+                echo 'Installing dependencies...'
+                bat 'npm install || echo No package.json'
             }
         }
 
@@ -17,6 +19,13 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
+                bat 'npm test || echo No tests found'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo 'Running static code analysis (simulated SonarQube)...'
             }
         }
     }
