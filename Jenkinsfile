@@ -3,18 +3,25 @@ pipeline {
 
     stages {
 
-        stage('Install') {
-    steps {
-        echo 'Installing dependencies...'
-        bat '''
-        if exist package.json (
-            npm install
-        ) else (
-            echo No Node project detected
-        )
-        '''
-    }
-}
+        stage('Checkout') {
+            steps {
+                echo 'Cloning repository...'
+            }
+        }
+
+        stage('Install (Build Tool Check)') {
+            steps {
+                echo 'Checking for build tools...'
+                bat '''
+                if exist package.json (
+                    echo Node project detected
+                    npm install
+                ) else (
+                    echo No Node project detected - skipping install
+                )
+                '''
+            }
+        }
 
         stage('Build') {
             steps {
@@ -25,7 +32,13 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                bat 'npm test || echo No tests found'
+                bat '''
+                if exist package.json (
+                    npm test
+                ) else (
+                    echo No tests available
+                )
+                '''
             }
         }
 
