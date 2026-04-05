@@ -4,11 +4,17 @@ pipeline {
     stages {
 
         stage('Install') {
-            steps {
-                echo 'Installing dependencies...'
-                bat 'npm install || echo No package.json'
-            }
-        }
+    steps {
+        echo 'Installing dependencies...'
+        bat '''
+        if exist package.json (
+            npm install
+        ) else (
+            echo No Node project detected
+        )
+        '''
+    }
+}
 
         stage('Build') {
             steps {
