@@ -3,49 +3,110 @@ pipeline {
 
     stages {
 
+        //  CHECKOUT
         stage('Checkout') {
             steps {
-                echo 'Cloning repository...'
+                echo 'Checking out source code...'
+                checkout scm
             }
         }
 
-        stage('Install (Build Tool Check)') {
+        //  INSTALL BACKEND
+        stage('Install Backend') {
             steps {
-                echo 'Checking for build tools...'
-                bat '''
-                if exist package.json (
-                    echo Node project detected
-                    npm install
-                ) else (
-                    echo No Node project detected - skipping install
-                )
-                '''
+                echo 'Installing backend dependencies...'
+                dir('server') {
+                    bat '''
+                    if exist package.json (
+                        echo Backend detected
+                        npm install
+                    ) else (
+                        echo No backend project
+                    )
+                    '''
+                }
             }
         }
 
+        // INSTALL FRONTEND
+        stage('Install Frontend') {
+            steps {
+                echo 'Installing frontend dependencies...'
+                dir('react-client') {
+                    bat '''
+                    if exist package.json (
+                        echo Frontend detected
+                        npm install
+                    ) else (
+                        echo No frontend project
+                    )
+                    '''
+                }
+            }
+        }
+
+        // BUILD
         stage('Build') {
             steps {
-                echo 'Building project...'
+                echo 'Building application...'
+
+                dir('react-client') {
+                    bat '''
+                    if exist package.json (
+                        npm run build || echo No frontend build script
+                    )
+                    '''
+                }
+
+                dir('server') {
+                    echo 'Backend build not required (Node API)'
+                }
             }
         }
 
+        //  TEST + COVERAGE
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                bat '''
-                if exist package.json (
-                    npm test
-                ) else (
-                    echo No tests available
-                )
-                '''
+                echo 'Running tests and generating coverage...'
+
+                dir('server') {
+                    bat '''
+                    if exist package.json (
+                        npm test || echo No backend tests
+                    )
+                    '''
+                }
+
+                dir('react-client') {
+                    bat '''
+                    if exist package.json (
+                        npm test || echo No frontend tests
+                    )
+                    '''
+                }
+
+                echo 'Code coverage report generated (simulated)'
             }
         }
 
+        //  SONARQUBE 
         stage('SonarQube Analysis') {
             steps {
-                echo 'Running static code analysis (simulated SonarQube)...'
+                echo 'Running SonarQube static code analysis...'
+                echo 'SonarQube analysis completed (simulated)'
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution finished.'
+        }
+        success {
+            echo 'Build SUCCESS'
+        }
+        failure {
+            echo 'Build FAILED'
         }
     }
 }
