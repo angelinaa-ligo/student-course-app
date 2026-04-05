@@ -97,7 +97,7 @@ pipeline {
             }
         }
 
-        //  DELIVER (
+        // DELIVER
         stage('Deliver') {
             steps {
                 echo 'Packaging application (artifact)...'
@@ -115,6 +115,29 @@ pipeline {
                 dir('server') {
                     echo 'Backend artifact ready (Node API)'
                 }
+            }
+        }
+
+        //  DEPLOY DEV 
+        stage('Deploy to DEV') {
+            steps {
+                echo 'Deploying application to DEV environment...'
+
+                dir('server') {
+                    bat '''
+                    echo Starting backend server in DEV...
+                    echo Backend running on http://localhost:5000 (simulated)
+                    '''
+                }
+
+                dir('react-client') {
+                    bat '''
+                    echo Starting frontend app in DEV...
+                    echo Frontend running on http://localhost:3000 (simulated)
+                    '''
+                }
+
+                echo 'Application successfully deployed to DEV environment'
             }
         }
     }
