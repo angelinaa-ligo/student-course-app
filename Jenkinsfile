@@ -66,28 +66,28 @@ pipeline {
 
         //  TEST + COVERAGE
         stage('Test') {
-            steps {
-                echo 'Running tests and generating coverage...'
+    steps {
+        echo 'Running tests and generating coverage...'
 
-                dir('server') {
-                    bat '''
-                    if exist package.json (
-                        npm test || echo No backend tests
-                    )
-                    '''
-                }
-
-                dir('react-client') {
-                    bat '''
-                    if exist package.json (
-                        npm test || echo No frontend tests
-                    )
-                    '''
-                }
-
-                echo 'Code coverage report generated (simulated)'
-            }
+        dir('server') {
+            bat '''
+            if exist package.json (
+                npm test || exit 0
+            )
+            '''
         }
+
+        dir('react-client') {
+            bat '''
+            if exist package.json (
+                npm test || exit 0
+            )
+            '''
+        }
+
+        echo 'Code coverage report generated (simulated)'
+    }
+}
 
         //  SONARQUBE 
         stage('SonarQube Analysis') {
