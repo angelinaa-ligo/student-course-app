@@ -118,7 +118,7 @@ pipeline {
             }
         }
 
-        //  DEPLOY DEV 
+        // DEPLOY DEV
         stage('Deploy to DEV') {
             steps {
                 echo 'Deploying application to DEV environment...'
@@ -138,6 +138,30 @@ pipeline {
                 }
 
                 echo 'Application successfully deployed to DEV environment'
+            }
+        }
+
+        // DEPLOY QAT
+        stage('Deploy to QAT') {
+            steps {
+                echo 'Deploying application to QAT environment...'
+                echo 'Application deployed to QAT (simulated)'
+            }
+        }
+
+        // DEPLOY STAGING
+        stage('Deploy to Staging') {
+            steps {
+                echo 'Deploying application to STAGING environment...'
+                echo 'Application deployed to STAGING (simulated)'
+            }
+        }
+
+        // DEPLOY PRODUCTION
+        stage('Deploy to Production') {
+            steps {
+                echo 'Deploying application to PRODUCTION environment...'
+                echo 'Application deployed to PRODUCTION (simulated)'
             }
         }
     }
