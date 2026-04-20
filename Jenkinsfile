@@ -93,12 +93,10 @@ pipeline {
         stage('SonarQube Analysis') {
     steps {
         withSonarQubeEnv('SonarQube') {
-            bat '''
-            sonar-scanner ^
-            -Dsonar.projectKey=student-course-app ^
-            -Dsonar.sources=. ^
-            -Dsonar.host.url=http://localhost:9000
-            '''
+            script {
+                def scannerHome = tool 'SonarScanner'
+                bat "${scannerHome}\\bin\\sonar-scanner.bat -Dsonar.projectKey=student-course-app -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000"
+            }
         }
     }
 }
