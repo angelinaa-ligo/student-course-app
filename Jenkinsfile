@@ -91,11 +91,17 @@ pipeline {
 
         // SONARQUBE
         stage('SonarQube Analysis') {
-            steps {
-                echo 'Running SonarQube static code analysis...'
-                echo 'SonarQube analysis completed (simulated)'
-            }
+    steps {
+        withSonarQubeEnv('SonarQube') {
+            bat '''
+            sonar-scanner ^
+            -Dsonar.projectKey=student-course-app ^
+            -Dsonar.sources=. ^
+            -Dsonar.host.url=http://localhost:9000
+            '''
         }
+    }
+}
 
         // DELIVER
         stage('Deliver') {
